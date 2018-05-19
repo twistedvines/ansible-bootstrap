@@ -1,0 +1,74 @@
+---
+- hosts: localhost
+  gather_facts: yes
+  pre_tasks:
+    - include_vars: 'vault'
+  tasks:
+    - name: Create ~/.ssh directory
+      file:
+        state: directory
+        path: ~/.ssh
+    - name: Create private key
+      openssl_privatekey:
+        state: present
+        type: RSA
+        size: 4096
+        path: ~/.ssh/id_rsa
+    - name: Create public key
+      openssl_publickey:
+        state: present
+        privatekey_path: ~/.ssh/id_rsa
+        path: ~/.ssh/id_rsa.pub
+    - name: Read public key from file
+      shell: cat ~/.ssh/id_rsa.pub
+      register: public_key
+    - name: Add public key to GitHub
+      github_key:
+        name: '{{ ansible_hostname }}'
+        state: present
+        pubkey: '{{ public_key.stdout }}'
+        token: '{{ vault_github_token }}'
+      when: vault_github_token is defined
+- hosts: localhost
+  tasks:
+    - name: Install Homebrew taps
+      homebrew_tap:
+        name: '{{ item }}'
+        state: present
+      with_items: '{{ homebrew_taps }}'
+    - name: Install Homebrew packages
+      homebrew:
+        name: '{{ item }}'
+        state: present
+      with_items: '{{ homebrew_packages }}'
+    - name: Clone dotfiles repository
+      git:
+        repo: '{{ dotfiles_repo }}'
+        dest: '/usr/local/src/dotfiles'
+  vars:
+    dotfiles_repo: 'https://github.com/twistedvines/dotfiles'
+    homebrew_taps:
+      - 'homebrew/services'
+      - 'homebrew/versions'
+      - 'homebrew/cask'
+      - 'brona/iproute2mac'
+    homebrew_packages:
+      - bash-completion
+      - curl
+      - netcat
+      - iterm2
+      - iproute2mac
+      - jq
+      - npm
+      - vagrant
+      - packer
+      - atom
+      - postman
+      - firefox
+      - google-chrome
+      - alfred
+      - git
+      - rbenv
+      - neovim
+      - tmux
+      - virtualbox
