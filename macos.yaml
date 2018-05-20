@@ -2,12 +2,20 @@
 - hosts: localhost
   gather_facts: yes
   pre_tasks:
+    - include_vars: 'main'
     - include_vars: 'vault'
   tasks:
     - name: Create ~/.ssh directory
       file:
         state: directory
         path: ~/.ssh
+    - name: Create /usr/local/src directory
+      file:
+        state: directory
+        path: /usr/local/src
+        owner: '{{ ansible_user_uid }}'
+        group: wheel
+      become: yes
     - name: Create private key
       openssl_privatekey:
         state: present
@@ -19,6 +27,7 @@
         state: present
         privatekey_path: ~/.ssh/id_rsa
         path: ~/.ssh/id_rsa.pub
+        format: OpenSSH
     - name: Read public key from file
       shell: cat ~/.ssh/id_rsa.pub
       register: public_key
@@ -33,7 +42,8 @@
   tasks:
     - name: Install Homebrew taps
       homebrew_tap:
-        name: '{{ item }}'
+        name: '{{ item.name }}'
+        url: '{{ item.url }}'
         state: present
       with_items: '{{ homebrew_taps }}'
     - name: Install Homebrew packages
@@ -41,34 +51,16 @@
         name: '{{ item }}'
         state: present
       with_items: '{{ homebrew_packages }}'
+    - name: Install Homebrew cask packages
+      homebrew_cask:
+        name: '{{ item }}'
+        state: present
+      with_items: '{{ homebrew_cask_packages }}'
     - name: Clone dotfiles repository
       git:
         repo: '{{ dotfiles_repo }}'
         dest: '/usr/local/src/dotfiles'
-  vars:
-    dotfiles_repo: 'https://github.com/twistedvines/dotfiles'
-    homebrew_taps:
-      - 'homebrew/services'
-      - 'homebrew/versions'
-      - 'homebrew/cask'
-      - 'brona/iproute2mac'
-    homebrew_packages:
-      - bash-completion
-      - curl
-      - netcat
-      - iterm2
-      - iproute2mac
-      - jq
-      - npm
-      - vagrant
-      - packer
-      - atom
-      - postman
-      - firefox
-      - google-chrome
-      - alfred
-      - git
-      - rbenv
-      - neovim
-      - tmux
-      - virtualbox
+    - name: Install dotfiles
+      make:
+        chdir: '/usr/local/src/dotfiles'
+        target: install

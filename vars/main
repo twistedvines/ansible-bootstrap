@@ -1,0 +1,29 @@
+---
+dotfiles_repo: 'https://github.com/twistedvines/dotfiles'
+homebrew_taps:
+  - name: 'homebrew/services'
+    url:
+  - name: 'homebrew/cask'
+    url: 'git@github.com:caskroom/homebrew-cask.git'
+homebrew_packages:
+  - 'bash-completion'
+  - 'curl'
+  - 'netcat'
+  - 'iproute2mac'
+  - 'jq'
+  - 'npm'
+  - 'packer'
+  - 'git'
+  - 'git-crypt'
+  - 'rbenv'
+  - 'neovim'
+  - 'tmux'
+homebrew_cask_packages:
+  - 'iterm2'
+  - 'vagrant'
+  - 'atom'
+  - 'postman'
+  - 'firefox'
+  - 'google-chrome'
+  - 'alfred'
+  - 'virtualbox'
