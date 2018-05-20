@@ -64,3 +64,21 @@
       make:
         chdir: '/usr/local/src/dotfiles'
         target: install
+    - name: Add zsh to allowed shells
+      lineinfile:
+        path: /etc/shells
+        regexp: '^/usr/local/bin/zsh$'
+        line: '/usr/local/bin/zsh'
+        state: present
+    - name: Install oh-my-zsh
+      shell: |-
+        sh -c \
+          "$(curl \
+          -fsSL \
+          https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+    - name: Clone powerline-fonts repository
+      git:
+        repo: 'git@github.com:powerline/fonts.git'
+        dest: '/usr/local/src/powerline-fonts'
+    - name: Install powerline-fonts
+      shell: 'cd /usr/local/src/powerline-fonts && ./install.sh'
