@@ -1,0 +1,17 @@
+---
+- name: '[homebrew] Install taps'
+  homebrew_tap:
+    name: '{{ item.name }}'
+    url: '{{ item.url }}'
+    state: present
+  with_items: '{{ homebrew_taps }}'
+- name: '[homebrew] Install packages'
+  homebrew:
+    name: '{{ item }}'
+    state: present
+  with_items: '{{ homebrew_packages }}'
+- name: '[homebrew] Install cask packages'
+  homebrew_cask:
+    name: '{{ item }}'
+    state: present
+  with_items: '{{ homebrew_cask_packages }}'
